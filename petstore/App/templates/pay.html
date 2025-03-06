@@ -1,10 +1,107 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block 'main' %}
+
+<div class="row mt-5">
+    <div class="col-md-5 mx-auto">
+        <button id="rzp-button1" class="btn btn-outline-dark btn-lg"><i class="fas fa-money-bill"></i>Pay with Razorpay</button>
+    </div>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  var options = {
+    "key": "rzp_test_Ty2fPZgb35aMIa",  // Your Razorpay API key
+    "key": "rzp_test_Ty2fPZgb35aMIa",  // Your Razorpay API key
+    "amount": "{{ payment.amount }}",  // Amount in paise
+    "currency": "INR",
+    "name": "Royals Pet Store",
+    "description": "Acme Corp",
+    "image": "https://example.com/image/rzp.jpg",  // Replace with your image URL
+    "order_id": "{{ payment.id }}",  // Order ID received from Razorpay
+
+    "prefill": {
+      "name": "Arjun",  // Replace with the actual user's name
+      "email": "mohith202421@gmail.com",  // Replace with the actual user's email
+      "contact": "+919390338255",  // Replace with the actual user's contact number
+    },
+
+    "notes": {
+      "address": "Razorpay Corporate Office"
+    },
+
+    "theme": {
+      "color": "#3399cc"
+    },
+
+    "handler": function (response) {
+      // Redirect to payment success page after successful payment
+      window.location.href = '/paymentsuccess';
+    },
+
+    "modal": {
+      "ondismiss": function () {
+        if (confirm("Are you sure you want to close the form?")) {
+          console.log("Checkout form closed by the user");
+        } else {
+          console.log("Complete the Payment");
+        }
+      }
+    },
+
+    // Customize Payment Methods
+    config: {
+      display: {
+        blocks: {
+          upi: { // Ensure UPI is included in the list of payment options
+            name: "Pay Using UPI",
+            instruments: [
+              {
+                method: "upi"
+              }
+            ]
+          },
+          other: { //  name for other block
+            name: "Other Payment Methods",
+            instruments: [
+              {
+                method: "card"
+              },
+              {
+                method: "netbanking"
+              }
+            ]
+          }
+        },
+        hide: [
+          // Example: You can hide UPI if required
+          // { method: "upi" }
+        ],
+        sequence: ["block.upi", "block.other"], // Sequence of blocks, you can modify as needed
+        preferences: {
+          show_default_blocks: true // If you want to show Razorpay's default payment blocks
+        }
+      }
+    }
+  };
+
+  var rzp1 = new Razorpay(options);
+
+  rzp1.on('payment.failed', function (response) {
+    alert("Payment failed! Error details:");
+    alert("Error code: " + response.error.code);
+    alert("Description: " + response.error.description);
+    alert("Source: " + response.error.source);
+    alert("Step: " + response.error.step);
+    alert("Reason: " + response.error.reason);
+    alert("Order ID: " + response.error.metadata.order_id);
+    alert("Payment ID: " + response.error.metadata.payment_id);
+  });
+
+  document.getElementById('rzp-button1').onclick = function (e) {
+    rzp1.open();
+    e.preventDefault();
+  }
+</script>
+
+{%endblock%}
